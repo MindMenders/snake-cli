@@ -73,12 +73,27 @@ pair<int,int> get_next_head(pair<int,int> current, char direction){
 // Every 50 points, the snake moves faster (speed reduces by 50ms).
 // Minimum speed is capped at 100ms.
 
+//#2 Now food will never spawn inside the snake.
+
+pair<int,int> generate_food(const deque<pair<int,int>> &snake, int size) {
+    pair<int,int> food;
+    while (true) {
+        food = make_pair(rand() % size, rand() % size);
+        // if food is NOT inside snake, return it
+        if (find(snake.begin(), snake.end(), food) == snake.end()) {
+            return food;
+        }
+    }
+}
+
+
 void game_play(){
     system("clear");
     deque<pair<int, int>> snake;
     snake.push_back(make_pair(0,0));
 
-    pair<int, int> food = make_pair(rand() % 10, rand() % 10);
+    // pair<int, int> food = make_pair(rand() % 10, rand() % 10);
+    pair<int, int> food = generate_food(snake, 10);
     int score = 0;
     int speed = 500; // in milliseconds
     for(pair<int, int> head=make_pair(0,1);; head = get_next_head(head, direction)){
@@ -91,7 +106,8 @@ void game_play(){
             exit(0);
         }else if (head.first == food.first && head.second == food.second) {
             // grow snake
-            food = make_pair(rand() % 10, rand() % 10);
+            // food = make_pair(rand() % 10, rand() % 10);
+            food = generate_food(snake, 10);
             snake.push_back(head);          
             // update score and speed
             score += 10;  
@@ -105,7 +121,7 @@ void game_play(){
         }
         render_game(10, snake, food);
         cout << "length of snake: " << snake.size() << endl;
-        cout << "Score: " << score << endl;
+        cout << "Score: " << score << endl; //#3 issue fixed here
         sleep_for(chrono::milliseconds(speed)); // use dynamic speed
     }
 }
