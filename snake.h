@@ -37,11 +37,13 @@ void input_handler(){
 }
 
 
-void render_game(int size, deque<pair<int, int>> &snake, pair<int, int> food){
+void render_game(int size, deque<pair<int, int>> &snake, pair<int, int> food, pair<int,int> poison){
     for(size_t i=0;i<size;i++){
         for(size_t j=0;j<size;j++){
             if (i == food.first && j == food.second){
                 cout << "🍎";
+            }else if (i == poison.first && j == poison.second){
+                cout << "☠️";  // poisonous food
             }else if (find(snake.begin(), snake.end(), make_pair(int(i), int(j))) != snake.end()) {
                 cout << "🐍";
             }else{
@@ -86,6 +88,21 @@ pair<int,int> generate_food(const deque<pair<int,int>> &snake, int size) {
     }
 }
 
+// #4
+// Introduce a poisonous food (e.g., "☠️").
+// It should not spawn inside the snake or overlap with normal food.
+// If the snake eats poisonous food → Game Over (or alternatively deduct score, but usually it ends the game).
+pair<int,int> generate_poison(const deque<pair<int,int>> &snake, int size, pair<int,int> food) {
+    pair<int,int> poison;
+    while (true) {
+        poison = make_pair(rand() % size, rand() % size);
+        // ensure it doesn't overlap with snake or normal food
+        if (find(snake.begin(), snake.end(), poison) == snake.end() && poison != food) {
+            return poison;
+        }
+    }
+}
+
 void game_play(){
     system("clear");
     deque<pair<int, int>> snake;
@@ -93,6 +110,7 @@ void game_play(){
 
     // pair<int, int> food = make_pair(rand() % 10, rand() % 10);
     pair<int, int> food = generate_food(snake, 10);
+    pair<int, int> poison = generate_poison(snake, 10, food);
 
     int score = 0;
     int speed = 500; // in milliseconds
@@ -102,24 +120,31 @@ void game_play(){
         // check self collision
         if (find(snake.begin(), snake.end(), head) != snake.end()) {
             system("clear");
-            cout << "Game Over" << endl;
+            cout << "Game Over! Final Score: " << score << endl;
             exit(0);
         }else if (head.first == food.first && head.second == food.second) {
             // grow snake
             //food = make_pair(rand() % 10, rand() % 10);
             food = generate_food(snake, 10);
+            poison = generate_poison(snake, 10, food); // spawn new poison too
             snake.push_back(head);          
             // update score and speed
             score += 10;  
             if (speed > 100 && score % 50 == 0) {  
                 speed -= 50; // every 50 points, snake gets faster
             }  
+        }else if (head.first == poison.first && head.second == poison.second) {
+            // ate poison → game over
+            system("clear");
+            cout << "Game Over! You ate poison ☠️" << endl;
+            cout << "Final Score: " << score << endl;
+            exit(0);
         }else{
             // move snake
             snake.push_back(head);
             snake.pop_front();
         }
-        render_game(10, snake, food);
+        render_game(10, snake, food, poison);
         cout << "length of snake: " << snake.size() << endl;
         cout << "Score: " << score << endl;  //fixed issue here
         sleep_for(chrono::milliseconds(speed)); // use dynamic speed
