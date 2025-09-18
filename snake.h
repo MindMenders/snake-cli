@@ -12,6 +12,7 @@ using namespace std;
 using std::chrono::system_clock;
 using namespace std::this_thread;
 char direction='r';
+bool paused = false;
 
 
 void input_handler(){
@@ -30,6 +31,8 @@ void input_handler(){
             direction = keymap[input];
         }else if (input == 'q'){
             exit(0);
+        }else if (input == 'p') {
+            paused = !paused;   // toggle pause
         }
         // You could add an exit condition here, e.g., if (input == 'q') break;
     }
@@ -117,6 +120,13 @@ void game_play(){
     for(pair<int, int> head=make_pair(0,1);; head = get_next_head(head, direction)){
         // send the cursor to the top
         cout << "\033[H";
+        // #5
+        if (paused) {
+        cout << "=== GAME PAUSED ===" << endl;
+        cout << "Press 'p' to resume" << endl;
+        sleep_for(chrono::milliseconds(200));  // short sleep while paused
+        continue;  // skip rest of loop
+        }
         // check self collision
         if (find(snake.begin(), snake.end(), head) != snake.end()) {
             system("clear");
