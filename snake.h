@@ -105,7 +105,7 @@ void game_play(){
         }
         render_game(10, snake, food);
         cout << "length of snake: " << snake.size() << endl;
-    
+        cout << "Score: " << score << endl;
         sleep_for(chrono::milliseconds(speed)); // use dynamic speed
     }
 }
