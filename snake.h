@@ -13,6 +13,8 @@ using std::chrono::system_clock;
 using namespace std::this_thread;
 char direction='r';
 bool paused = false;
+vector<int> highScores;
+
 
 
 void input_handler(){
@@ -38,6 +40,15 @@ void input_handler(){
     }
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 }
+
+void updateHighScores(int score) {
+    highScores.push_back(score);
+    sort(highScores.begin(), highScores.end(), greater<int>()); // sort descending
+    if (highScores.size() > 10) {
+        highScores.resize(10); // keep only top 10
+    }
+}
+
 
 
 void render_game(int size, deque<pair<int, int>> &snake, pair<int, int> food, pair<int,int> poison){
@@ -131,6 +142,16 @@ void game_play(){
         if (find(snake.begin(), snake.end(), head) != snake.end()) {
             system("clear");
             cout << "Game Over! Final Score: " << score << endl;
+
+            // update high scores
+            updateHighScores(score);
+
+            // show top 10 scores
+            cout << "\n=== Top 10 High Scores ===" << endl;
+            for (int i = 0; i < highScores.size(); i++) {
+                cout << i + 1 << ". " << highScores[i] << endl;
+            }
+
             exit(0);
         }else if (head.first == food.first && head.second == food.second) {
             // grow snake
@@ -148,6 +169,16 @@ void game_play(){
             system("clear");
             cout << "Game Over! You ate poison ☠️" << endl;
             cout << "Final Score: " << score << endl;
+
+            // update high scores
+            updateHighScores(score);
+
+            // show top 10 scores
+            cout << "\n=== Top 10 High Scores ===" << endl;
+            for (int i = 0; i < highScores.size(); i++) {
+                cout << i + 1 << ". " << highScores[i] << endl;
+            }
+            
             exit(0);
         }else{
             // move snake
