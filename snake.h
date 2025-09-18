@@ -68,7 +68,10 @@ pair<int,int> get_next_head(pair<int,int> current, char direction){
     
 }
 
-
+// #1 With these edits:
+// Score increases by 10 each time food is eaten.
+// Every 50 points, the snake moves faster (speed reduces by 50ms).
+// Minimum speed is capped at 100ms.
 
 void game_play(){
     system("clear");
@@ -76,6 +79,8 @@ void game_play(){
     snake.push_back(make_pair(0,0));
 
     pair<int, int> food = make_pair(rand() % 10, rand() % 10);
+    int score = 0;
+    int speed = 500; // in milliseconds
     for(pair<int, int> head=make_pair(0,1);; head = get_next_head(head, direction)){
         // send the cursor to the top
         cout << "\033[H";
@@ -87,7 +92,12 @@ void game_play(){
         }else if (head.first == food.first && head.second == food.second) {
             // grow snake
             food = make_pair(rand() % 10, rand() % 10);
-            snake.push_back(head);            
+            snake.push_back(head);          
+            // update score and speed
+            score += 10;  
+            if (speed > 100 && score % 50 == 0) {  
+                speed -= 50; // every 50 points, snake gets faster
+            }  
         }else{
             // move snake
             snake.push_back(head);
@@ -96,6 +106,6 @@ void game_play(){
         render_game(10, snake, food);
         cout << "length of snake: " << snake.size() << endl;
     
-        sleep_for(500ms);
+        sleep_for(chrono::milliseconds(speed)); // use dynamic speed
     }
 }
